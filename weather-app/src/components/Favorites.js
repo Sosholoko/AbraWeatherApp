@@ -11,7 +11,9 @@ function Favorites() {
     dispatch(removeFavorite(city));
   };
 
-  console.log("Favorites:", favorites);
+  useEffect(() => {
+    console.log(favorites);
+  }, [favorites]);
 
   return (
     <div className="container mt-3">
