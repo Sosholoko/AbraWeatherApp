@@ -1,10 +1,10 @@
 // favoritesActions.js
 
-export const addFavorite = (city) => {
+export const addFavorite = (city, temperature, condition) => {
   debugger;
   return {
     type: "ADD_FAVORITE",
-    payload: city
+    payload: { city, temperature, condition }
   };
 };
 export const removeFavorite = (city) => ({

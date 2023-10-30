@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFavorite } from "../redux/favoritesActions";
+import { Link } from "react-router-dom";
+import "./style/favorites.style.scss";
 
 function Favorites() {
   const favorites = useSelector((state) => state.favorites.favorites);
@@ -16,17 +18,25 @@ function Favorites() {
   }, [favorites]);
 
   return (
-    <div className="container mt-3">
-      <h1>Favorites</h1>
-      <ul>
+    <>
+      <h1 className="title">Your Favorites</h1>
+      <div className="container mt-3 favorites-container">
         {favorites.map((city) => (
-          <li key={city}>
-            {city}
-            <button onClick={() => handleRemoveFavorite(city)}>Remove</button>
-          </li>
+          <Link className="fav_link" to={`/weather/${city.city}`} key={city}>
+            <div key={city} className="favorite-item">
+              <div className="favorite-info">
+                <div className="favorite-city">{city.city}</div>
+                <div className="favorite-temperature">{city.temperature}</div>
+                <div className="favorite-condition">{city.condition}</div>
+              </div>
+              <div className="favorite-remove" onClick={() => handleRemoveFavorite(city)}>
+                &times;
+              </div>
+            </div>
+          </Link>
         ))}
-      </ul>
-    </div>
+      </div>
+    </>
   );
 }
 
