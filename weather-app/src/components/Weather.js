@@ -3,34 +3,41 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { addFavorite } from "../redux/favoritesActions";
 import { useParams } from "react-router-dom";
+import Swal from "sweetalert2";
+
 import "./style/weather.style.scss";
 
 function Weather() {
-  function importAllImages() {
-    const images = {};
-    const requireContext = require.context("./images/weatherIcons", false, /\.(png|jpg|jpeg)$/);
-    requireContext.keys().forEach((filename) => {
-      const imageName = filename.replace(/^.*[\\/]/, "").replace(/\..*$/, ""); // Extract image name
-      images[imageName] = requireContext(filename);
-    });
-    return images;
-  }
-
-  const weatherIcons = importAllImages();
+  const apiKey3 = "EKkpV7wi1FyMUHGQPzYGUDwcrbDjKsx4";
+  const apiKey = "c7EKVXLuHyAffsQmLZvGTn2MDriFUvEm";
+  const apiKey2 = "AJ9rOotB2dU77ZvwNCdIbzL0zoBfBb3x";
 
   const dispatch = useDispatch();
+  const favorites = useSelector((state) => state.favorites.favorites);
   const { city: cityParam } = useParams();
+
+  // State variables
   const [city, setCity] = useState("Tel Aviv");
   const [selectedCity, setSelectedCity] = useState("Tel Aviv");
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
+  const [isHeartClicked, setIsHeartClicked] = useState(false);
 
-  const apiKey3 = "EKkpV7wi1FyMUHGQPzYGUDwcrbDjKsx4";
-  const apiKey2 = "c7EKVXLuHyAffsQmLZvGTn2MDriFUvEm";
-  const apiKey = "AJ9rOotB2dU77ZvwNCdIbzL0zoBfBb3x";
+  // Import weather icons
+  const importAllImages = () => {
+    const images = {};
+    const requireContext = require.context("./images/weatherIcons", false, /\.(png|jpg|jpeg)$/);
+    requireContext.keys().forEach((filename) => {
+      const imageName = filename.replace(/^.*[\\/]/, "").replace(/\..*$/, "");
+      images[imageName] = requireContext(filename);
+    });
+    return images;
+  };
+  const weatherIcons = importAllImages();
 
+  // Effects
   useEffect(() => {
     console.log(forecastData);
   }, [forecastData]);
@@ -62,9 +69,43 @@ function Weather() {
     }
   }, [weatherData]);
 
+  // Event handlers
   const handleAddFavorite = () => {
     if (!city && !suggestions.includes("Tel Aviv")) return;
-    dispatch(addFavorite(city, weatherData.Temperature.Metric.Value, weatherData.WeatherText || "Tel Aviv"));
+
+    const isCityInFavorites = favorites.some((favorite) => favorite.city === city);
+
+    if (!isCityInFavorites) {
+      dispatch(addFavorite(city, weatherData.Temperature.Metric.Value, weatherData.WeatherText || "Tel Aviv"));
+
+      let timerInterval;
+      Swal.fire({
+        title: "Done !",
+        icon: "success",
+        html: "Location added to your favorites ♡",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        didOpen: () => {
+          timerInterval = setInterval(() => {}, 100);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        }
+      }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+        }
+      });
+      setIsHeartClicked(true);
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Seems like this location is already in your favorites.",
+        confirmButtonText: "Got it",
+        confirmButtonColor: "rgb(35, 72, 119)"
+      });
+    }
   };
 
   const searchWeather = async (city) => {
@@ -143,7 +184,7 @@ function Weather() {
               <div className="city_label">
                 <h1>{selectedCity}</h1>
                 <button className="add-to-favorites" onClick={handleAddFavorite}>
-                  <span>&#43;</span> {/* Plus sign entity */}
+                  <i className={`fa-regular fa-heart${isHeartClicked ? " clicked" : ""}`}></i>
                 </button>
               </div>
 
@@ -165,8 +206,8 @@ function Weather() {
                   <p className="condition_text">{weatherData.WeatherText}</p>
                 </div>
 
-                <div style={{ height: "100px", width: "100px", marginTop: "10%" }}>
-                  <img src={weatherIcons[`icon${weatherData.WeatherIcon}`]} alt="" style={{ height: "100px", width: "150px" }} />
+                <div className="condition_icon">
+                  <img src={weatherIcons[`icon${weatherData.WeatherIcon}`]} alt="" />
                 </div>
               </div>
             </div>
@@ -176,13 +217,13 @@ function Weather() {
             <div className="searchField">
               <input type="text" value={city} onChange={handleCityChange} placeholder="Enter city name" />
               <button onClick={() => searchWeather(city)}>
-                <i class="fa-solid fa-heart"></i>Search
+                Search <i class="fa-solid fa-magnifying-glass"></i>
               </button>
             </div>
 
             {isSuggestionsVisible && (
               <ul className="autocomplete_list">
-                {suggestions.map((item) => (
+                {suggestions.slice(0, 5).map((item) => (
                   <li key={item.Key} onClick={() => handleSuggestionClick(item.LocalizedName)}>
                     {item.LocalizedName}
                   </li>
@@ -200,7 +241,7 @@ function Weather() {
 
                 {weatherData.IsDayTime ? (
                   <>
-                    <img src={weatherIcons[`icon${day.Day.Icon}`]} alt="" style={{ height: "40px", width: "60px" }} />
+                    <img src={weatherIcons[`icon${day.Day.Icon}`]} alt="" style={{ height: "40px", width: "70px" }} />
                     <div className="forecast-temperature">
                       {day.Temperature.Minimum.Value}° - {day.Temperature.Maximum.Value}°
                     </div>
@@ -208,7 +249,7 @@ function Weather() {
                   </>
                 ) : (
                   <>
-                    <img src={weatherIcons[`icon${day.Night.Icon}`]} alt="" style={{ height: "40px", width: "60px" }} />
+                    <img src={weatherIcons[`icon${day.Night.Icon}`]} alt="" style={{ height: "40px", width: "70px" }} />
                     <div className="forecast-temperature">
                       {day.Temperature.Minimum.Value}° - {day.Temperature.Maximum.Value}°
                     </div>

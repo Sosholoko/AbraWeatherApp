@@ -3,7 +3,6 @@ const initialState = {
 };
 
 const favoritesReducer = (state = initialState, action) => {
-  debugger;
   switch (action.type) {
     case "ADD_FAVORITE":
       return {
