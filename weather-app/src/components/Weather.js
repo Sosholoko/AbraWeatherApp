@@ -8,9 +8,9 @@ import Swal from "sweetalert2";
 import "./style/weather.style.scss";
 
 function Weather() {
-  const apiKey3 = "EKkpV7wi1FyMUHGQPzYGUDwcrbDjKsx4";
-  const apiKey = "c7EKVXLuHyAffsQmLZvGTn2MDriFUvEm";
-  const apiKey2 = "AJ9rOotB2dU77ZvwNCdIbzL0zoBfBb3x";
+  const apiKey2 = "EKkpV7wi1FyMUHGQPzYGUDwcrbDjKsx4";
+  const apiKey3 = "c7EKVXLuHyAffsQmLZvGTn2MDriFUvEm";
+  const apiKey = "AJ9rOotB2dU77ZvwNCdIbzL0zoBfBb3x";
 
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites.favorites);
@@ -38,9 +38,6 @@ function Weather() {
   const weatherIcons = importAllImages();
 
   // Effects
-  useEffect(() => {
-    console.log(forecastData);
-  }, [forecastData]);
 
   useEffect(() => {
     if (cityParam) {
@@ -110,7 +107,7 @@ function Weather() {
 
   const searchWeather = async (city) => {
     try {
-      const autoCompleteResponse = await axios.get(`http://dataservice.accuweather.com/locations/v1/cities/autocomplete`, {
+      const autoCompleteResponse = await axios.get(`https://dataservice.accuweather.com/locations/v1/cities/autocomplete`, {
         params: {
           apikey: apiKey,
           q: city
@@ -119,7 +116,7 @@ function Weather() {
 
       if (autoCompleteResponse.data && autoCompleteResponse.data[0]) {
         const locationKey = autoCompleteResponse.data[0].Key;
-        const currentConditionsResponse = await axios.get(`http://dataservice.accuweather.com/currentconditions/v1/${locationKey}`, {
+        const currentConditionsResponse = await axios.get(`https://dataservice.accuweather.com/currentconditions/v1/${locationKey}`, {
           params: {
             apikey: apiKey,
             metric: true
@@ -130,7 +127,7 @@ function Weather() {
         setSelectedCity(city);
         setIsSuggestionsVisible(false);
 
-        const fiveDayForecastResponse = await axios.get(`http://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}`, {
+        const fiveDayForecastResponse = await axios.get(`https://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}`, {
           params: {
             apikey: apiKey,
             metric: true
@@ -151,7 +148,7 @@ function Weather() {
 
     if (inputCity) {
       axios
-        .get(`http://dataservice.accuweather.com/locations/v1/cities/autocomplete`, {
+        .get(`https://dataservice.accuweather.com/locations/v1/cities/autocomplete`, {
           params: {
             apikey: apiKey,
             q: inputCity
